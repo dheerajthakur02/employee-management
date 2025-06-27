@@ -1,4 +1,3 @@
-import employee from "../models/employee.js";
 import Employee from "../models/employee.js";
 import bcrypt from "bcryptjs";
 export const createEmployee = async (req,res)=>{
@@ -79,9 +78,9 @@ export const getEmployeesUsingfilter = async (req,res) =>{
 
 export const updateEmployeeUsingId = async (req,res) =>{
           const {id}= req.params;
-          const {name, dept, role , salary} = req.body;
+          const {name, dept, role , salary, status} = req.body;
           try {
-                const employee = await Employee.findOneAndUpdate({id},{name, dept, role , salary}, {new:true});
+                const employee = await Employee.findOneAndUpdate({id},{name, dept, role , salary,status}, {new:true});
                   if(!employee){
                   return res.status(404).json({message:"Employee not found"});
                  }
@@ -100,3 +99,30 @@ export const deleteEmployeeUsingId = async (req,res) =>{
             return res.status(500).json({message:"Internal server error"})
         }
 }
+
+export const getAllEmployeesDetails = async (req,res)=>{
+        try {
+            const employeesList = await Employee.find();
+
+            if(employeesList){
+                return res.status(200).json({message:"All employees data fetched successfully",employeesList})
+            }
+        } catch (error) {
+             return res.status(500).json({message:"Internal server error"})
+        }
+}
+
+
+export const getEmployeeById = async (req,res) =>{
+       const {id} = req.params;
+       try {
+          const employee = await Employee.findOne({id});
+          if(employee){
+              return res.status(200).json({message:"Employee data fetched successfully",employee})
+          }else{
+            return res.status(404).json({message:"Employee data not found"})
+          }
+       } catch (error) {
+         return res.status(500).json({message:"Internal server error"})
+       }
+} 
