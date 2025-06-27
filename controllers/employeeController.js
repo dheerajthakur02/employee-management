@@ -1,5 +1,6 @@
+import employee from "../models/employee.js";
 import Employee from "../models/employee.js";
-
+import bcrypt from "bcryptjs";
 export const createEmployee = async (req,res)=>{
     const {name, email , dept, role,yearsOfExperience,salary,password} = req.body;
     try {
@@ -7,11 +8,10 @@ export const createEmployee = async (req,res)=>{
         return res.status(404).json({message:"Something is missing"});
           }
 
-    // const exist = await Employee.findOne({email});
-    // console.log(exist);
-    // if(exist){
-    //     return res.status(500).json({message:"Employee already exists, you please loggin"});
-    // }
+    const exist = await Employee.findOne({email});
+    if(exist){
+        return res.status(500).json({message:"Employee already exists, you please loggin"});
+    }
 
     const employee = new Employee({
           name, email , dept, role,yearsOfExperience,salary ,password
@@ -24,6 +24,32 @@ export const createEmployee = async (req,res)=>{
         return res.status(500).json({message:"Internal server error"})
     }
   
+}
+
+export const EmployeeLogin = async(req,res)=>{
+       const {email, password}= req.body;
+       try {
+            if(!email || !password){
+                return res.status(404).json({message:"Something is missing"});
+            }
+            
+            const employee= await Employee.findOne({email})
+
+            if(!employee){
+                return res.status(404).json({message:"Employee do not exist"})
+            }
+            
+            const isMatch= await bcrypt.compare(password, employee.password);
+
+            if(isMatch){
+             return res.status(201).json({message:"Employee account has been looged in successfully!!", employee})
+            }else{
+             return res.status(500).json({message:"incorrect password, please try again"})
+            }
+
+       } catch (error) {
+           return res.status(500).json({message:"Internal server error"})
+       }
 }
 
 
